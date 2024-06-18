@@ -6,10 +6,9 @@ import json
 import logging
 import random
 from playwright.async_api import Playwright, async_playwright, expect
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 import requests
 import re
-from clean import get_link
 
 # Configure logging to display messages to the terminal
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler()])
@@ -37,7 +36,7 @@ async def shill():
 
         page = await context.new_page()
         page.set_default_timeout(55000)
-        await page.goto('https://x.com/mymixtapez/status/1802807348404105393')
+        await page.goto('tweetlink')
         logging.info("Session continued")
         await page.wait_for_load_state()
         await asyncio.sleep(random.randint(5, 8))
@@ -114,13 +113,19 @@ async def shill():
                                       tweetReplyPos["y"] + tweetReplyPos["height"] / 2)
                 await page.mouse.down()
                 await page.mouse.up()
-                await page.wait_for_load_state()
                 await asyncio.sleep(random.randint(1, 3))
+                # click tweet for reply
+                expect(page.get_by_test_id("tweetButton")).to_be_visible()
+                await page.get_by_test_id("tweetButton").click()
+                await page.wait_for_load_state()
                 logging.info("Post reply successful")
+                await asyncio.sleep(random.randint(6, 10))
 
         except Exception as e:
             logging.error("Post already Liked check logs")
             logging.error(f"Failed reason {e}")
+
+
 
         # like, retweet, replay at random and book mark for raids
     await context.close()
