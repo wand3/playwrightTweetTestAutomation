@@ -42,7 +42,7 @@ def handle_dialog(dialog):
 
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False)
+    browser = p.firefox.launch(headless=False)
     context = browser.new_context(
         viewport={"width": 768, "height": 1024},  # iPad Mini viewport size
         user_agent="Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
@@ -87,7 +87,7 @@ with sync_playwright() as p:
     tel_input = page.get_by_label("Your phone number")
     if tel_input:
         tel_input.click()
-        page.get_by_label("Your phone number").fill('+123 45 678 9101')
+        page.get_by_label("Your phone number").fill('+123 45 6789 1011')
 
         print("success phone number")
         page.get_by_role("button", name="Next").is_visible()
@@ -299,20 +299,37 @@ with sync_playwright() as p:
                             page.mouse.move(back_pos["x"] + back_pos["width"] / 2,
                                             back_pos["y"] + back_pos["height"] / 2)
                             logging.info("Hover to Back")
+                            time.sleep(random.randint(2, 5))
                             page.mouse.down()
+                            page.mouse.down()
+
+                            # back[1].click()
                             page.mouse.up()
                             logging.info("Click back Successful")
-
                             page.wait_for_load_state()
-                            time.sleep(random.randint(1, 3))
-                            # check if schedule message is visible
-                            expect(page.get_by_label('Open scheduled messages')).to_be_visible(timeout=10000)
 
-                            sch_locator = page.get_by_label('Open scheduled messages')
+                            # go to home page
+                            back[0].click()
+                            page.goto("https://web.telegram.org/a/#-1002038450855")
+                            page.wait_for_load_state()
+                            time.sleep(random.randint(1, 4))
+
+                            # button of same group link to close side panel
+                            # chat = page.locator("a[href='#-1002038450855']")
+                            # chat.click()
+                            logging.info("Page with side panel closed")
+
+                            time.sleep(random.randint(1, 5))
+                            # check if schedule message is visible
+                            page.locator("button[title='Open scheduled messages']").click()
+                            # expect(page.get_by_label('Open scheduled messages')).to_be_visible(timeout=20000)
+
+                            # sch_locator = page.get_by_label('Open scheduled messages')
+
                             logging.info("Scheduled messages icon seen")
 
                             # get and click schedule message
-                            sch_locator.click()
+                            # sch_locator.click()
                             page.wait_for_load_state()
 
                             # find text box and click
@@ -334,31 +351,47 @@ with sync_playwright() as p:
 
                             # text.click(force=True)
                             logging.info(f"schedule message {count} typed successfully")
-
+                            # page.on("dialog", lambda dialog: dialog.accept())
                             # find schedule icon and click
+                            page.wait_for_load_state()
                             snd = page.query_selector_all('button[aria-label="Send Message"]')
                             snd[0].click()
                             logging.info("send message schedule send message check logs")
-
                             page.wait_for_load_state()
+
+                            # hover to time picker and click
+                            # timep = page.query_selector('div[class="timepicker"]')
+                            # timep_pos = timep.bounding_box()
+                            # # Calculate coordinates for clicking on the left side of the element
+                            # left_x = timep_pos['x']
+                            # center_y = timep_pos['y'] + timep_pos['height'] / 2
+                            #
+                            # # Perform the click on the left side of the element
+                            # page.mouse.click(left_x + 5, center_y,
+                            #                  button='left')  # Adding a small offset (5px) to the left
+
+                            # page.mouse.move(timep_pos["x"] + timep_pos["width"] / 2, timep_pos["y"] + timep_pos["height"] / 2)
+                            # page.mouse.down()
                             # time.sleep(random.randint(3, 5))
                             logging.info("send message schedule send message click successful")
 
                             # Wait until the element is visible
-                            page.wait_for_selector('h4:visible:has-text("June")')
-                            # expect(page.locator("#portals > div:nth-child(2) > div > div > div.modal-dialog > div > div.timepicker")).to_be_visible()
+                            # page.wait_for_selector('h4:visible:has-text("June")').is_visible()
+                            expect(page.locator(
+                                "#portals > div:nth-child(2) > div > div > div.modal-dialog > div > div.timepicker")).to_be_visible()
+                            # expect(page.query_selector_all('input[inputmode="decimal"]')).to_be_visible()
                             logging.info("Time picker load successful")
 
-                            # hour = page.query_selector_all('input[inputmode="decimal"]')
+                            hour = page.query_selector_all('input[inputmode="decimal"]')
                             # page.evaluate("arguments[0].click()", hour[0])
                             # hour[0].click()
                             # hour[0].click()
                             # hour = page.locator("#portals > div > div > div > div.modal-dialog > div > div.timepicker > input:nth-child(1)")
                             # hour = page.query_selector('//*[@id="portals"]/div[1]/div/div/div[2]/div/div[3]/input[1]')
                             # hour.click(delay=6000)
-                            hour = page.query_selector('.timepicker input')
+                            # hour = page.query_selector('.timepicker input')
                             print(hour)
-                            hour_pos = hour.bounding_box()
+                            hour_pos = hour[0].bounding_box()
                             page.mouse.move(hour_pos["x"] + hour_pos["width"] / 2,
                                             hour_pos["y"] + hour_pos["height"] / 2)
                             logging.info("Hover to set Hour")
@@ -397,15 +430,17 @@ with sync_playwright() as p:
                             page.keyboard.type(f'{message_minute}', delay=2000)
                             logging.info("Minute set")
 
-                            expect(page.locator(
-                                '//*[@id="portals"]/div[1]/div/div/div[2]/div/div[4]/div/button')).to_be_visible()
+                            # expect(page.locator(
+                            #     '//*[@id="portals"]/div[1]/div/div/div[2]/div/div[4]/div/button')).to_be_visible()
                             # send today button
                             send_sch = page.locator('//*[@id="portals"]/div[1]/div/div/div[2]/div/div[4]/div/button')
+                            # send_sch = page.query_selector('#portals > div:nth-child(1) > div > div > div.modal-dialog > div > div.footer > div > button')
+                            # send_sch.click()
+
                             send_pos = send_sch.bounding_box()
                             # move bouse to location
                             page.mouse.move(send_pos["x"] + send_pos["width"] / 2,
                                             send_pos["y"] + send_pos["height"] / 2)
-                            logging.info("Hover to set Hour")
                             page.mouse.down()
                             page.mouse.up()
                             logging.info("Set Schedule Successful")
@@ -418,7 +453,7 @@ with sync_playwright() as p:
                             page.wait_for_load_state()
                             # time.sleep(7)
                     except Exception as e:
-                        logging.error(traceback.format_exc)
+                        logging.error(traceback.format_exc(e))
                         logging.info(f"Unable to send message check logs : {e}")
                         exit_program()
 
