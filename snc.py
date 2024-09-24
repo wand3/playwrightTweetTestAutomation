@@ -33,12 +33,12 @@ async def sign_in(page, context):
         return "Not Visible"
     await page.locator("input[name='text']").click()
     await asyncio.sleep(random.randint(2, 5))
-    await page.locator("input[name='text']").fill("countriaro@gmail.com")
+    await page.locator("input[name='text']").fill("example@gmail.com")
 
-    # await page.locator('input[type="text"][placeholder="Username"]').fill("countriaro@gmail.com")
+    # await page.locator('input[type="text"][placeholder="Username"]').fill("example@gmail.com")
     await page.get_by_role("button", name="Next").click()
     await page.get_by_label("Password", exact=True).click()
-    await page.get_by_label("Password", exact=True).fill("/Poiuytrewq123")
+    await page.get_by_label("Password", exact=True).fill("password")
     await page.get_by_test_id("controlView").get_by_test_id("LoginForm_Login_Button").click()
 
     # Wait for login to complete
@@ -49,7 +49,7 @@ async def sign_in(page, context):
         cookies = await context.cookies()
         with open(file_path, 'w') as f:
             json.dump(cookies, f)
-    await save_cookies(context, '../twshiller/cookies.json')
+    await save_cookies(context, 'cookies.json')
 
 # handle and dismiss dialogs
 async def handle_dialog(dialog):
@@ -214,7 +214,7 @@ async def shill():
             user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
         )
 
-        await load_cookies(context, "../twshiller/cookies.json")
+        await load_cookies(context, "cookies.json")
         logging.info("Session cookies loaded succesfully")
 
         page = await context.new_page()
